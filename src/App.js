@@ -1,25 +1,36 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import { Button } from 'react-bootstrap';
+import ImageModal from './Components/ImageModal';
+import ResultTable from './Components/ResultTable';
+import axios from 'axios';
+import Landing from './Components/Landing';
 
-function App() {
+const App = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [apiResult, setApiResult] = useState([]);
+
+  const handleShowModal = () => setShowModal(true);
+  const handleCloseModal = () => setShowModal(false);
+
+  const handleImageClick = (image) => {
+    setSelectedImage(image);
+  };
+
+  const handleApiSubmit = async () => {
+    try {
+      const response = await axios.post('/your-api-endpoint', { file: selectedImage });
+      setApiResult(response.data);
+      handleCloseModal();
+    } catch (error) {
+      console.error('Error submitting API request', error);
+      handleCloseModal();
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <Landing />
   );
-}
+};
 
 export default App;
