@@ -3,9 +3,9 @@ import { Modal, Button } from 'react-bootstrap';
 
 const ImageModal = ({ showModal, handleCloseModal, handleImageClick, handleApiSubmit, selectedImage }) => {
   const images = [
-    '../Photo/00000001_002.png',
-    '../Photo/00000001_000.png',
-    '../Photo/00000001_001.png',
+    '../Photo/00026024_009.png',
+    '../Photo/00003604_000.png',
+    '../Photo/00015043_000.png',
   ];
 
   return (

@@ -1,0 +1,64 @@
+.glucose-panel {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+  }
+  
+  .header {
+    display: flex;
+    align-items: center;
+  }
+  
+  .profile-pic {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-right: 20px;
+  }
+  
+  .chart-container {
+    margin-top: 20px;
+  }
+  
+  .chart-container h3 {
+    margin-bottom: 10px;
+  }
+  
+  .bar-container {
+    position: relative;
+    display: flex;
+    height: 30px;
+    margin-bottom: 20px;
+  }
+  
+  .bar-segment {
+    flex: 1;
+    height: 100%;
+  }
+  
+  .bar-segment.low {
+    background-color: red;
+  }
+  
+  .bar-segment.optimal {
+    background-color: green;
+  }
+  
+  .bar-segment.high {
+    background-color: red;
+  }
+  
+  .indicator {
+    position: absolute;
+    top: -10px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .value {
+    background-color: white;
+    border: 1px solid black;
+    padding: 5px;
+    border-radius: 5px;
+  }
