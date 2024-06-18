@@ -50,16 +50,16 @@ const ResultTable = ({ apiResult }) => {
       <table class="sortable" style={{width: '90%', marginLeft: 'auto', marginRight: 'auto'}} ref={tableRef}>
         <tbody>
         <tr>
-            <th class="bg-primary" style={{borderTopLeftRadius: 24}}>Disease</th>
-            <th class="bg-primary" >Scale</th>
-            <th class="bg-primary">Flag</th>
-            <th class="bg-primary" style={{borderTopRightRadius: 24}}>Selected</th>
+            <th class="bg-primary text-light" style={{borderTopLeftRadius: 24}}>Disease</th>
+            <th class="bg-primary text-light text-end" >Scale (%)</th>
+            <th class="bg-primary text-light text-center">Flag</th>
+            <th class="bg-primary text-light" style={{borderTopRightRadius: 24}}>Selected</th>
           </tr>
           {Object.entries(apiResult).map(([disease, scale]) => (
             <tr key={disease} onClick={() => handleRowClick(disease)}>
               <td style={(((scale - minLimit[disease])/Math.max(scale, maxLimit[disease])) * 100).toFixed(2) > 85 ? {fontWeight: 'bold', backgroundColor: 'orange'} : {}}>{disease}</td>
-              <td style={(((scale - minLimit[disease])/Math.max(scale, maxLimit[disease])) * 100).toFixed(2) > 85 ? {fontWeight: 'bold', backgroundColor: 'orange'} : {}}>{(((scale - minLimit[disease])/Math.max(scale, maxLimit[disease])) * 100).toFixed(2)}</td>
-              <td style={(((scale - minLimit[disease])/Math.max(scale, maxLimit[disease])) * 100).toFixed(2) > 85 ? {fontWeight: 'bold', backgroundColor: 'orange'} : {}}>{(((scale - minLimit[disease])/Math.max(scale, maxLimit[disease])) * 100).toFixed(2) > 85 ? "Potential Positive": "Potential Negative"}</td>
+              <td class="text-end" style={(((scale - minLimit[disease])/Math.max(scale, maxLimit[disease])) * 100).toFixed(2) > 85 ? {fontWeight: 'bold', backgroundColor: 'orange'} : {}}>{(((scale - minLimit[disease])/Math.max(scale, maxLimit[disease])) * 100).toFixed(2)}%</td>
+              <td class="text-center" style={(((scale - minLimit[disease])/Math.max(scale, maxLimit[disease])) * 100).toFixed(2) > 85 ? {fontWeight: 'bold', backgroundColor: 'orange'} : {}}>{(((scale - minLimit[disease])/Math.max(scale, maxLimit[disease])) * 100).toFixed(2) > 85 ? "Potential Positive": "Potential Negative"}</td>
               <td style={recommendDisease.includes(disease) ? {fontWeight: 'bold', backgroundColor: 'orange'} : {}}>{recommendDisease.includes(disease) ? "Selected": ""}</td>
             </tr>
           ))}

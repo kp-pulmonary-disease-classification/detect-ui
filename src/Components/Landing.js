@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import ImageModal from "./ImageModal";
 import ResultTable from "./ResultTable";
-import axios from "axios";
 import ImageZoom from "react-image-zooom";
 import { FaExchangeAlt } from "react-icons/fa";
 import { BounceLoader } from "react-spinners";
