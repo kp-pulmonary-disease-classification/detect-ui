@@ -7,7 +7,7 @@ const ResultTable = ({ apiResult }) => {
       <div class="text-light" style={{padding: 10}}>
       <h3>Patient Pulmonary Diagnostic Exam Result</h3>
       </div>
-      <div class="bg-white" style={{height: '100%', paddingTop: 16}}>
+      <div style={{backgroundColor: "rgb(245,245,245)", height: '100%', paddingTop: 16}}>
       <table class="sortable" style={{width: '100%'}}>
         <thead >
           <tr>

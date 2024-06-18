@@ -137,7 +137,7 @@ const Landing = () => {
             <div
               style={{
                 display: "flex",
-                height: "98%",
+                height: "92%",
                 margin: 10,
                 backgroundColor: "rgb(245,245,245)",
                 borderRadius: 16,
