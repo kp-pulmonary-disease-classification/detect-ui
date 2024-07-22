@@ -1,13 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 
-const ImageModal = ({ showModal, handleCloseModal, handleImageClick, handleApiSubmit, selectedImage }) => {
-  const images = [
-    '../Photo/00000001_002.png',
-    '../Photo/00026024_009.png',
-    '../Photo/00003604_000.png',
-    '../Photo/00015043_000.png',
-  ];
+const ImageModal = ({ images, showModal, handleCloseModal, handleImageClick, handleApiSubmit, selectedImage }) => {
+  const [imageObjects, setImageObjects] = useState(['../photo/00000001_002.png']);
+  useEffect(() => {
+    const srcs = images.map((image) => {
+      const byteCharacters = atob(image.file.buffer);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: image.file.mimetype });
+      return {
+        imageUrl: URL.createObjectURL(blob),
+        imageId: image._id
+      };
+    });
+    setImageObjects(srcs);
+
+
+    return () => {
+      srcs.forEach((src) => {
+        URL.revokeObjectURL(src.inageUrl);
+      });
+    };
+  }, [images]);
+
 
   return (
     <Modal show={showModal} onHide={handleCloseModal}>
@@ -16,10 +35,10 @@ const ImageModal = ({ showModal, handleCloseModal, handleImageClick, handleApiSu
       </Modal.Header>
       <Modal.Body>
         <div className="image-gallery">
-          {images.map((image, index) => (
+          {imageObjects.map((image, index) => (
             <img
               key={index}
-              src={image}
+              src={image.imageUrl}
               alt={`Gallery image ${index + 1}`}
               onClick={() => handleImageClick(image)}
               style={{

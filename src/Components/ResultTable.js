@@ -3,7 +3,7 @@ import { DownloadTableExcel } from 'react-export-table-to-excel';
 import { Button } from "react-bootstrap";
 import ConfirmModal from './ConfirmModal';
 
-const ResultTable = ({ apiResult }) => {
+const ResultTable = ({ apiResult, patientInfo, selectedImage, setIsLoading }) => {
   const maxLimit = {
     'Atelectasis':0.208167,
     'Effusion':0.217179,
@@ -30,16 +30,26 @@ const ResultTable = ({ apiResult }) => {
   }
   const tableRef = useRef(null);
   const [recommendDisease, setrecommendDisease] = useState([]);
-  const handleRowClick = (key) => {
+  const handleRowClick = (key, scale) => {
     setrecommendDisease((prevrecommendDisease) =>
-      prevrecommendDisease.includes(key)
-        ? prevrecommendDisease.filter((k) => k !== key)
-        : [...prevrecommendDisease, key]
+      prevrecommendDisease.find(k => k.disease === key)
+        ? prevrecommendDisease.filter((k) => k.disease !== key)
+        : [...prevrecommendDisease, {
+          disease: key,
+          accruacy: scale
+        }]
     );
     console.log(recommendDisease)
   };
   const [showModal, setShowModal] = useState(false);
-  const handleShowModal = () => setShowModal(true);
+  const handleShowModal = () => {
+    if (recommendDisease.length > 0) {
+      setShowModal(true);
+    } else {
+      alert("Please select at least one diagnosis")
+    }
+
+  }
   const handleCloseModal = () => setShowModal(false);
   return (
     <div style={{height: '100%', width: '100%', paddingTop: 10,}}>
@@ -56,11 +66,13 @@ const ResultTable = ({ apiResult }) => {
             <th class="bg-primary text-light" style={{borderTopRightRadius: 24}}>Selected</th>
           </tr>
           {Object.entries(apiResult).map(([disease, scale]) => (
-            <tr key={disease} onClick={() => handleRowClick(disease)}>
-              <td style={(((scale - minLimit[disease])/Math.max(scale, maxLimit[disease])) * 100).toFixed(2) > 85 ? {fontWeight: 'bold', backgroundColor: 'orange'} : {}}>{disease}</td>
-              <td class="text-end" style={(((scale - minLimit[disease])/Math.max(scale, maxLimit[disease])) * 100).toFixed(2) > 85 ? {fontWeight: 'bold', backgroundColor: 'orange'} : {}}>{(((scale - minLimit[disease])/Math.max(scale, maxLimit[disease])) * 100).toFixed(2)}%</td>
-              <td class="text-center" style={(((scale - minLimit[disease])/Math.max(scale, maxLimit[disease])) * 100).toFixed(2) > 85 ? {fontWeight: 'bold', backgroundColor: 'orange'} : {}}>{(((scale - minLimit[disease])/Math.max(scale, maxLimit[disease])) * 100).toFixed(2) > 85 ? "Potential Positive": "Potential Negative"}</td>
-              <td style={recommendDisease.includes(disease) ? {fontWeight: 'bold', backgroundColor: 'orange'} : {}}>{recommendDisease.includes(disease) ? "Selected": ""}</td>
+            <tr key={disease} onClick={() => handleRowClick(disease,
+              (scale * 100).toFixed(2)
+            )}>
+              <td style={(scale * 100).toFixed(2) > 85 ? {fontWeight: 'bold', backgroundColor: 'orange'} : {}}>{disease}</td>
+              <td class="text-end" style={(scale * 100).toFixed(2) > 85 ? {fontWeight: 'bold', backgroundColor: 'orange'} : {}}>{(scale * 100).toFixed(2)}%</td>
+              <td class="text-center" style={(scale * 100).toFixed(2) > 85 ? {fontWeight: 'bold', backgroundColor: 'orange'} : {}}>{(scale * 100).toFixed(2) > 85 ? "Potential Positive": "Potential Negative"}</td>
+              <td style={recommendDisease.find(k => k.disease === disease) ? {fontWeight: 'bold', backgroundColor: 'orange'} : {}}>{recommendDisease.find(k => k.disease === disease) ? "Selected": ""}</td>
             </tr>
           ))}
         </tbody>
@@ -80,9 +92,12 @@ const ResultTable = ({ apiResult }) => {
                 <Button style={{flex: 1, backgroundColor: 'green'}} onClick={handleShowModal}> Confirm Recommendations </Button>   
                 </div>
                 <ConfirmModal
+                patientInfo={patientInfo}
+                selectedImage={selectedImage}
         showModal={showModal}
         handleCloseModal={handleCloseModal}
         recommended={recommendDisease}
+        setIsLoading={setIsLoading}
       />
       </div>
     </div>

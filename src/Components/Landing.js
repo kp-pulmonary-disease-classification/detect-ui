@@ -3,33 +3,73 @@ import { Button } from "react-bootstrap";
 import ImageModal from "./ImageModal";
 import ResultTable from "./ResultTable";
 import ImageZoom from "react-image-zooom";
-import { FaExchangeAlt } from "react-icons/fa";
+import { FaExchangeAlt, FaImages } from "react-icons/fa";
 import { BounceLoader } from "react-spinners";
 
+
 const Landing = () => {
+  const patientId = 132
+  const [patientInfo, setPatientInfo] = useState(null)
+  const [patientXRay, setPatientXray] = useState([])
   const [showModal, setShowModal] = useState(false);
   const [toSubmitApiFile, setToSubmitApiFile] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [apiResult, setApiResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false)
+  const [predictionArea, setPredictionArea] = useState(null);
+  const [isBackendAccessible, setIsBackendAccessible] = useState(true);
+  const [isHeatMapShown, setIsHeatMapShown] = useState(false);
+
 
   const handleShowModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
+  useEffect(() => {
+    const callAPi = async () => {
+        setIsLoading(true)
+        try {
+        const patientInfoRequest = await fetch(
+          "https://e-react-node-backend-22ed6864d5f3.herokuapp.com/searchPatientById", { 
+            headers: {
+                "Content-Type": "application/json",
+              },
+            method: "POST", 
+            body: JSON.stringify({ patientId: patientId }) }
+        );
+        const patientInfoOutput = await patientInfoRequest.json();
+        setPatientInfo(patientInfoOutput);
 
+        const imageRequest = await fetch(
+            "https://e-react-node-backend-22ed6864d5f3.herokuapp.com/imageRetrieveByPatientId", { 
+              headers: {
+                  "Content-Type": "application/json",
+                },
+              method: "POST", 
+              body: JSON.stringify({ patientId: patientId, recordType: "X-Ray_Chest" }) }
+          );
+          const imageOutput = await imageRequest.json();
+          setPatientXray(imageOutput.success);
+        } catch (err) {
+            setIsBackendAccessible(false)
+            console.log(err)
+        }
+        setIsLoading(false)
+      };
+      callAPi();
+  }, [])
   useEffect(() => {
     if (toSubmitApiFile) {
       const callAPi = async () => {
-        console.log(toSubmitApiFile);
         setIsLoading(true)
         const formData = new FormData();
         formData.append("file", toSubmitApiFile);
         const response = await fetch(
-          "https://pd-cxr-dev.azurewebsites.net/predict",
+          "https://lung-disease-lucas-6a2ddcfd938e.herokuapp.com/predict",
           { method: "POST", body: formData }
         );
-        const output = await response.json()
-        console.log("Result of API " + output.predictions.Atelectasis);
-        setApiResult(output.predictions);
+        const output = await response.json();
+        setPredictionArea(`data:image/png;base64,${output.heatmap}`)
+        setIsHeatMapShown(true)
+        setApiResult(output);
         setIsLoading(false)
       };
       callAPi();
@@ -43,7 +83,7 @@ const Landing = () => {
   const handleApiSubmit = async () => {
     try {
       const req = new XMLHttpRequest();
-      req.open("GET", selectedImage, true);
+      req.open("GET", selectedImage.imageUrl, true);
       req.responseType = "blob";
       setApiResult(null)
       req.onload = (event) => {
@@ -58,7 +98,6 @@ const Landing = () => {
     }
     handleCloseModal();
   };
-
   return (
     <div
       style={{
@@ -109,21 +148,62 @@ const Landing = () => {
             )}
           </div>
           <div style={{ display: "flex", height: "94%", width: '100%', alignItems: "center" ,backgroundColor: "rgb(245,245,245)",}}>
-            {!selectedImage ? (
-              <Button
-                style={{ marginLeft: "auto", marginRight: "auto" }}
-                onClick={handleShowModal}
-              >
-                Select X-Ray Image
-              </Button>
-            ) : (
+            {
+            // isBackendAccessible ? (
+            //   <div style={{marginLeft: "auto", marginRight: "auto"}}>Backend is not accessible</div>
+            // ) : 
+            !selectedImage ? (
+                <Button
+                  style={{ marginLeft: "auto", marginRight: "auto" }}
+                  onClick={handleShowModal}
+                >
+                  Select X-Ray Image
+                </Button>
+              )
+            :
+            (
               <div
                 style={{ marginLeft: "auto", marginRight: "auto", width: 600 }}
               >
                 <div
                   style={{ marginLeft: "auto", marginRight: "auto", flex: 1 }}
                 >
-                  <ImageZoom src={selectedImage} alt={selectedImage} />
+                    {
+                        isHeatMapShown ? 
+                        <>                 <Button
+                        style={{
+                          marginLeft: "auto",
+                          marginRight: 45,
+                          width: 150,
+                          marginBottm: 20,
+                          height: 34
+                        }}
+                        onClick={() => setIsHeatMapShown(!isHeatMapShown)}
+                      >
+                        Switch to Orignal
+                      </Button>
+                      <div style={{marginTop: 10}}>
+                      <ImageZoom src={predictionArea} alt={predictionArea} />
+                      </div></>
+                      
+                         : 
+                         <>                 <Button
+                        style={{
+                            marginLeft: "auto",
+                            marginRight: 45,
+                            width: 190,
+                            marginBottm: 20,
+                            height: 34
+                        }}
+                        onClick={() => setIsHeatMapShown(!isHeatMapShown)}
+                      >
+                        Switch to Focus
+                      </Button>
+                      <div style={{marginTop: 10}}>
+                        <ImageZoom src={selectedImage.imageUrl} alt={selectedImage} />
+                        </div>
+                        </>
+                    }
                 </div>
               </div>
             )}
@@ -144,7 +224,7 @@ const Landing = () => {
               }}
               class="bg-primary"
             >
-              <ResultTable apiResult={apiResult} />
+              <ResultTable apiResult={apiResult.predictions} patientInfo={patientInfo} selectedImage={selectedImage} setIsLoading={setIsLoading}/>
             </div>
           </div>
         )}
@@ -155,6 +235,7 @@ const Landing = () => {
         handleCloseModal={handleCloseModal}
         handleImageClick={handleImageClick}
         handleApiSubmit={handleApiSubmit}
+        images={patientXRay}
         selectedImage={selectedImage}
       />
       <div style={{position: 'absolute', top: '25%', }}>
